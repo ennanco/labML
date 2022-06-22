@@ -161,7 +161,7 @@ def main():
                         help='Fixing the seed to this value to train and to split the dataset')
     parser.add_argument('--splits',
                         help='Number of splits to be made in the cross validation (default:10)')
-     args = parser.parse_args()
+    args = parser.parse_args()
 
     screen_header("Setting up the Laboratory")
     set_seed(seed=args.seed)
