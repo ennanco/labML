@@ -138,7 +138,8 @@ def run_experiments(data, splits):
             splits, cv = itertools.tee(splits)
             scores = cross_validate(pipeline, X, y, cv=cv,
                                 scoring =('r2', 'neg_mean_squared_error'),
-                                return_train_score=True)
+                                return_train_score=True,
+                                n_jobs=-1)
             results.loc[len(results.index)] = [scale, preprocess,
                                                regressor,scores['test_r2'],
                                                scores['test_neg_mean_squared_error']]
@@ -148,6 +149,9 @@ def run_experiments(data, splits):
                                        description=f"[green]({scale}->{preprocess}->{regressor}) ✅ [/green]")
         training_progress.update(id_train_progress, visible= False)
         overall_progress.update(id_overall, description="All Experiments Compleated!")
+
+        # Plain the results making a row for each test, it takes care to pair both colunms
+        results = results.apply(pd.Series.explode)
 
     return results
 
