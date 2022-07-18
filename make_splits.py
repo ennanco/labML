@@ -95,7 +95,7 @@ regressors = {
 
 
 @report_arguments("Set seed")
-def set_seed(seed) -> int:
+def set_seed(seed) -> None:
     """"
         This function loads the seed or generate it, if required
         Return: None
@@ -103,7 +103,6 @@ def set_seed(seed) -> int:
     """
     to_seed = int(seed) if seed else int.from_bytes(os.urandom(4), byteorder='big')
     np.random.seed(to_seed)
-    return to_seed
 
 @report_arguments(label=None)
 def load_data(filepath:Path)->pd.DataFrame:
@@ -118,7 +117,7 @@ def load_data(filepath:Path)->pd.DataFrame:
 
 
 @report_arguments(label=None)
-def prepare_data(data:pd.DataFrame, n_splits:int,seed=None):
+def prepare_data(data:pd.DataFrame, n_splits:int, seed=None):
     X = data.iloc[:,6:-1]
     y = data.iloc[:,5].ravel()
     X = X.replace(np.inf, np.nan)
@@ -133,101 +132,45 @@ def prepare_data(data:pd.DataFrame, n_splits:int,seed=None):
     return splits,(X,y)
 
 
-def run_experiments(data, splits):
-    # Definir las posibles combinaciones
-    experiments = itertools.product(scales.keys(),
-                                          preprocesses.keys(),
-                                          regressors.keys())
-
-    results = pd.DataFrame(columns=['scale', 'preprocess', 'regressor', 'R2', 'RMSE'])
-
-    experiments, test_number = itertools.tee(experiments)
-    test_number = len(list(test_number))
-
-    X = data[0]
-    y = data[1]
-    with Live(group_progress):
-        id_overall = overall_progress.add_task("", total=test_number)
-        id_train_progress = training_progress.add_task("[red]Training[/red]", total=None)
-        for index, (scale, preprocess, regressor) in enumerate(experiments):
-            overall_progress.update(id_overall, description=f"{index} of {test_number} Experiments Completed")
-            id_experiment = experiment_progress.add_task(
-                f"[red]({scale}->{preprocess}->{regressor})[/red]")
-            pipeline = make_pipeline(scales[scale],
-                                 preprocesses[preprocess],
-                                 regressors[regressor])
-            pipeline = clone(pipeline)
-            splits, cv = itertools.tee(splits)
-            # TODO cambiar por el RandomSearchCV
-            scores = cross_validate(pipeline, X, y, cv=cv,
-                                scoring =('r2', 'neg_root_mean_squared_error'),
-                                return_train_score=True,
-                                n_jobs=-1)
-            results.loc[len(results.index)] = [scale, preprocess,
-                                               regressor,scores['test_r2'],
-                                               scores['test_neg_root_mean_squared_error']]
-            overall_progress.update(id_overall, advance=1)
-            experiment_progress.stop_task(id_experiment)
-            experiment_progress.update(id_experiment,
-                                       description=f"[green]({scale}->{preprocess}->{regressor}) ✅ [/green]")
-        training_progress.update(id_train_progress, visible= False)
-        overall_progress.update(id_overall, description="All Experiments Compleated!")
-
-        # Plain the results making a row for each test, it takes care to pair both colunms
-        results = results.apply(pd.Series.explode)
-
-    return results
-
-
 
 def main():
-    parser = argparse.ArgumentParser(description='Plain Tester')
-    parser.add_argument('datapath', type=str, nargs=1,
-                        help='path to the files with the dataset')
-    parser.add_argument('--seed',
-                        help='Fixing the seed to this value to train and to split the dataset')
-    parser.add_argument('--splits',
-                        help='Number of splits to be made in the cross validation (default:10)')
-    args = parser.parse_args()
-
-    screen_header("Setting up the Laboratory")
-    seed = set_seed(seed=args.seed)
-    filepath = Path(args.datapath[0])
-    n_splits = int(args.splits) if args.splits else 10
+    seed=47
+    set_seed(seed=seed)
+    filepath = Path('_data_/DQO.xlsx')
+    n_splits = 10
     try:
         data = load_data(filepath)
     except:
         print(f"[bold red]ERROR[/bold red] Unable to load file [yellow] {filepath}[/yellow]")
         return
 
-    screen_header("Starting Experiments")
-    results_filename =f'{datetime.today().strftime("%Y%m%d")}_results.xlsx'
 
     origins = np.append(data['Origen'].unique(), None)
     waters = np.append(data['Tipo de agua'].unique(), None)
-    with pd.ExcelWriter(results_filename) as writer: 
-        for origin, water in itertools.product(origins, waters):
-            if origin is None:
-                origin = 'all'
-                partition = data
-            else:
-                partition = data[data.Origen==origin]
+    for origin, water in itertools.product(origins, waters):
+        if origin is None:
+            origin = 'all'
+            partition = data
+        else:
+            partition = data[data.Origen==origin]
 
-            if water is None:
-                water = 'all'
-            else:
-                partition = partition[partition['Tipo de agua']==water]
+        if water is None:
+            water = 'all'
+        else:
+            partition = partition[partition['Tipo de agua']==water]
 
-            partition_name = f"{origin}_{water}"
-            if partition.shape[0] > 0:
-                splits, partition = prepare_data(partition, n_splits=n_splits, seed=seed)
-                results = run_experiments(partition, splits)
-                results.to_excel(writer, f"{partition_name}_tests")
-                results.groupby(['scale', 'preprocess',
-                    'regressor']).agg(['mean','std']).to_excel(writer, f"{partition_name}")
+        partition_name = f"{origin}_{water}"
+        if partition.shape[0] > 0:
+            splits, partition = prepare_data(partition, n_splits=n_splits, seed=seed)
+            partitions = np.zeros(len(partition[1]), dtype=int)
+            for (id_partition, (train, test)) in enumerate(splits):
+                partitions[list(test)] = id_partition
 
-    screen_header("Writing the report")
-    report("Printing output to", results_filename)
+            np.savetxt(f'_partitions_/{partition_name}.csv', partitions, delimiter=',')
+            if origin == 'all' and water == 'all':
+                data.iloc[:,6:-1] = partition[0]
+                data.to_excel(f'_partitions_/DQO_corrected.xlsx')
+
 
 
 if  __name__ == '__main__':
