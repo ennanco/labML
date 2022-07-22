@@ -118,17 +118,19 @@ def load_data(filepath:Path)->pd.DataFrame:
 
 
 @report_arguments(label=None)
-def prepare_data(data:pd.DataFrame, n_splits:int,seed=None):
-    X = data.iloc[:,6:-1]
+def prepare_data(data:pd.DataFrame, n_splits:int,seed=Nonei, index_file=None):
+    X = data.iloc[:,6:]
     y = data.iloc[:,5].ravel()
-    X = X.replace(np.inf, np.nan)
-    X = X.replace(r'INF', np.nan, regex=True)
-    X = X.replace(r' ', np.nan, regex=True)
     X = X.astype('float64')
-    imputer = KNNImputer(missing_values=np.nan)
-    X = imputer.fit_transform(X)
-    cv = KFold(n_splits=n_splits, shuffle=True, random_state=seed)
-    splits = cv.split(X,y)
+    if index_file:
+        indexes = np.loadtxt(index_file).asdtype('int')
+        data = data.reset_index()
+        splits = ((data[indexes!= i].index, 
+            data[indexes == i].index) for i in np.unique(indexes))
+    else:
+        cv = KFold(n_splits=n_splits, shuffle=True, 
+                random_state=seed)
+        splits = cv.split(X,y)
 
     return splits,(X,y)
 
@@ -182,6 +184,8 @@ def run_experiments(data, splits):
 
 def main():
     parser = argparse.ArgumentParser(description='Plain Tester')
+    parser.add_argument('problem_name', type=str, nargs=1,
+                        help= 'name of the problem')
     parser.add_argument('datapath', type=str, nargs=1,
                         help='path to the files with the dataset')
     parser.add_argument('--seed',
@@ -191,8 +195,9 @@ def main():
     args = parser.parse_args()
 
     screen_header("Setting up the Laboratory")
-    seed = set_seed(seed=args.seed)
+    problem_name = args.problem_name[0]
     filepath = Path(args.datapath[0])
+    seed = set_seed(seed=args.seed)
     n_splits = int(args.splits) if args.splits else 10
     try:
         data = load_data(filepath)
@@ -201,7 +206,7 @@ def main():
         return
 
     screen_header("Starting Experiments")
-    results_filename =f'{datetime.today().strftime("%Y%m%d")}_results.xlsx'
+    results_filename =f'{datetime.today().strftime("%Y%m%d")}_{problem_name}_results.xlsx'
 
     origins = np.append(data['Origen'].unique(), None)
     waters = np.append(data['Tipo de agua'].unique(), None)
@@ -220,7 +225,7 @@ def main():
 
             partition_name = f"{origin}_{water}"
             if partition.shape[0] > 0:
-                splits, partition = prepare_data(partition, n_splits=n_splits, seed=seed)
+                splits, partition = prepare_data(partition, n_splits=n_splits, seed=seed, file_index=f'_data_/_partitions_/{problem_name}_{partition_name}')
                 results = run_experiments(partition, splits)
                 results.to_excel(writer, f"{partition_name}_tests")
                 results.groupby(['scale', 'preprocess',
