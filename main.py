@@ -60,9 +60,13 @@ training_progress = Progress(TextColumn("{task.description}"),
                              SpinnerColumn("dots"),
                              BarColumn()
                             )
+partition_progress = Progress(TimeElapsedColumn(),
+                        TextColumn("{task.description}")
+                       )
 
 group_progress = Group(
-    Panel(Group(experiment_progress, training_progress), width=80),
+    Panel(partition_progress,width=80,title ="Partitions..."),
+    Panel(Group(experiment_progress, training_progress), width=80,title="Experiments..."),
     overall_progress)
 
 #Basic treatment of the data
@@ -118,17 +122,17 @@ def load_data(filepath:Path)->pd.DataFrame:
 
 
 @report_arguments(label=None)
-def prepare_data(data:pd.DataFrame, n_splits:int,seed=Nonei, index_file=None):
+def prepare_data(data:pd.DataFrame, n_splits:int,seed=None, index_file=None):
     X = data.iloc[:,6:]
     y = data.iloc[:,5].ravel()
     X = X.astype('float64')
     if index_file:
-        indexes = np.loadtxt(index_file).asdtype('int')
+        indexes = np.loadtxt(index_file).astype('int')
         data = data.reset_index()
-        splits = ((data[indexes!= i].index, 
+        splits = ((data[indexes!= i].index,
             data[indexes == i].index) for i in np.unique(indexes))
     else:
-        cv = KFold(n_splits=n_splits, shuffle=True, 
+        cv = KFold(n_splits=n_splits, shuffle=True,
                 random_state=seed)
         splits = cv.split(X,y)
 
@@ -151,6 +155,8 @@ def run_experiments(data, splits):
     with Live(group_progress):
         id_overall = overall_progress.add_task("", total=test_number)
         id_train_progress = training_progress.add_task("[red]Training[/red]", total=None)
+        completed_experiments = []
+
         for index, (scale, preprocess, regressor) in enumerate(experiments):
             overall_progress.update(id_overall, description=f"{index} of {test_number} Experiments Completed")
             id_experiment = experiment_progress.add_task(
@@ -172,8 +178,17 @@ def run_experiments(data, splits):
             experiment_progress.stop_task(id_experiment)
             experiment_progress.update(id_experiment,
                                        description=f"[green]({scale}->{preprocess}->{regressor}) ✅ [/green]")
-        training_progress.update(id_train_progress, visible= False)
-        overall_progress.update(id_overall, description="All Experiments Compleated!")
+            completed_experiments.append(id_experiment)
+            if len(completed_experiments) > 10:
+                   experiment_progress.update(completed_experiments.pop(0), visible=False)
+
+        # Clear remaining lines in the panel of completed experiments before anotjer run
+        for id_experient in completed_experiments:
+            experiment_progress.update(id_experiment, visible=False)
+
+
+        training_progress.update(id_train_progress, visible=False)
+        overall_progress.update(id_overall, visible=False)
 
         # Plain the results making a row for each test, it takes care to pair both colunms
         results = results.apply(pd.Series.explode)
@@ -184,8 +199,6 @@ def run_experiments(data, splits):
 
 def main():
     parser = argparse.ArgumentParser(description='Plain Tester')
-    parser.add_argument('problem_name', type=str, nargs=1,
-                        help= 'name of the problem')
     parser.add_argument('datapath', type=str, nargs=1,
                         help='path to the files with the dataset')
     parser.add_argument('--seed',
@@ -195,8 +208,9 @@ def main():
     args = parser.parse_args()
 
     screen_header("Setting up the Laboratory")
-    problem_name = args.problem_name[0]
     filepath = Path(args.datapath[0])
+    problem_name = filepath.stem
+    partitions_dir = Path(filepath.parent) / '_partitions_'
     seed = set_seed(seed=args.seed)
     n_splits = int(args.splits) if args.splits else 10
     try:
@@ -210,7 +224,7 @@ def main():
 
     origins = np.append(data['Origen'].unique(), None)
     waters = np.append(data['Tipo de agua'].unique(), None)
-    with pd.ExcelWriter(results_filename) as writer: 
+    with pd.ExcelWriter(results_filename) as writer:
         for origin, water in itertools.product(origins, waters):
             if origin is None:
                 origin = 'all'
@@ -224,13 +238,17 @@ def main():
                 partition = partition[partition['Tipo de agua']==water]
 
             partition_name = f"{origin}_{water}"
+            id_partition = partition_progress.add_task(f"[red]{partition_name}[/red]")
             if partition.shape[0] > 0:
-                splits, partition = prepare_data(partition, n_splits=n_splits, seed=seed, file_index=f'_data_/_partitions_/{problem_name}_{partition_name}')
+                partition_file_name = partitions_dir / f'{problem_name}_{partition_name}.csv'
+                splits, partition = prepare_data(partition, n_splits=n_splits, seed=seed, index_file=str(partition_file_name))
                 results = run_experiments(partition, splits)
                 results.to_excel(writer, f"{partition_name}_tests")
                 results.groupby(['scale', 'preprocess',
                     'regressor']).agg(['mean','std']).to_excel(writer, f"{partition_name}")
-
+            partition_progress.stop_task(id_partition)
+            partition_progress.update(id_partition,
+                                       description=f"[green]{partition_name}[/green]")
     screen_header("Writing the report")
     report("Printing output to", results_filename)
 
