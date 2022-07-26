@@ -186,7 +186,7 @@ def run_experiments(data, splits):
     return results
 
 
-def regression(datapath:str, seed:int, n_splits:int=10, output_filename:str):
+def regression(datapath:str, seed:int, n_splits:int=10, output_filename:str=None):
 
     screen_header("Setting up the Laboratory")
     filepath = Path(datapath)
