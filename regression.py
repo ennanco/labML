@@ -1,8 +1,6 @@
 #! /usr/bin/env python3
 # General system
 import os
-import typer
-from typing import Optional
 import itertools
 from datetime import datetime
 from pathlib import Path
@@ -48,10 +46,6 @@ from sklearn.feature_selection import SelectPercentile, f_regression, mutual_inf
 from util.common import set_seed
 from util.cli_report import (screen_header, report,
                         report_arguments, report_output)
-
-
-# Define the new app for typer
-app = typer.Typer()
 
 
 #Define the progress bars
@@ -192,12 +186,7 @@ def run_experiments(data, splits):
     return results
 
 
-@app.command()
-def regression(datapath:str,
-         seed:int = typer.Option(None,
-                                 help='Fixing the seed to this value to train and to split the dataset',
-                                 callback=set_seed),
-         n_splits:int = typer.Option(10, help='Number of splits to be made in the cross validation')):
+def regression(datapath:str, seed:int, n_splits:int=10, output_filename:str):
 
     screen_header("Setting up the Laboratory")
     filepath = Path(datapath)
@@ -210,7 +199,8 @@ def regression(datapath:str,
         return
 
     screen_header("Starting Experiments")
-    results_filename =f'{datetime.today().strftime("%Y%m%d")}_{problem_name}_results.xlsx'
+    results_filename =output_filename if output_filename else f'{datetime.today().strftime("%Y%m%d")}_{problem_name}_results.xlsx'
+
 
     origins = np.append(data['Origen'].unique(), None)
     waters = np.append(data['Tipo de agua'].unique(), None)
@@ -241,8 +231,4 @@ def regression(datapath:str,
                                        description=f"[green]{partition_name}[/green]")
     screen_header("Writing the report")
     report("Printing output to", results_filename)
-
-
-if  __name__ == '__main__':
-    app()
 
