@@ -14,8 +14,9 @@ def cmd_regression(datapath:str,
                                  help='Fixing the seed to this value to train and to split the dataset',
                                  callback=set_seed),
                    n_splits:int = typer.Option(10, help='Number of splits to be made in the cross validation')
-                  ):
-    regression(datapath, seed, n_splits)
+                   output_filename:str = typer.Option(None,
+                                                      help=' Name to give to the results file'):
+    regression(datapath, seed, n_splits, output_filename)
 
 
 @app.command(name='prepare_data')
@@ -35,6 +36,7 @@ def callback():
     """
         This command allows to operate over a problem to prepate them or execute some preliminary test
     """
+    pass
 
 if __name__ == "__main__":
     app()
