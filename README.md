@@ -1,4 +1,4 @@
-# Laboratory for regression with Machine Learning
+# Laboratory of Machine Learning
 
 This commandline app is dedsign to perform some easy test on a problem by applying several machine learning techniques. Nowadays the app has only two command:
 - *prepare-data*. This extracts the different matrices and performs a cross-validation to store the data on an specific folder for the following command. Actually, it is bound to the problem, so, it could be required to be implemented for each problem.
