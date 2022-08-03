@@ -2,8 +2,13 @@
 # General system
 import os
 import itertools
+import typer
 from datetime import datetime
 from pathlib import Path
+
+# General Research libbraries
+import numpy as np
+import pandas as pd
 
 # Presentation options
 from rich import print
@@ -17,9 +22,6 @@ from rich.progress import (
     TextColumn,
     TimeElapsedColumn)
 
-# General Research libbraries
-import numpy as np
-import pandas as pd
 
 # Machine Learning libraries
 from sklearn.base import clone
@@ -145,7 +147,7 @@ def run_experiments(data, splits):
     with Live(group_progress):
         id_overall = overall_progress.add_task("", total=test_number)
         id_train_progress = training_progress.add_task("[red]Training[/red]", total=None)
-        completed_experiments = []
+        completed_experiments = list()
 
         for index, (scale, preprocess, regressor) in enumerate(experiments):
             overall_progress.update(id_overall, description=f"{index} of {test_number} Experiments Completed")
@@ -171,9 +173,8 @@ def run_experiments(data, splits):
             completed_experiments.append(id_experiment)
             if len(completed_experiments) > 10:
                    experiment_progress.update(completed_experiments.pop(0), visible=False)
-
-        # Clear remaining lines in the panel of completed experiments before anotjer run
-        for id_experient in completed_experiments:
+        # Clear remaining lines in the panel before another run
+        for id_experiment in completed_experiments:
             experiment_progress.update(id_experiment, visible=False)
 
 
@@ -232,3 +233,5 @@ def regression(datapath:str, seed:int, n_splits:int=10, output_filename:str=None
     screen_header("Writing the report")
     report("Printing output to", results_filename)
 
+if __name__ == '__main__':
+    typer.run(regression)

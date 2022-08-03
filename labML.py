@@ -1,14 +1,15 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-    This file is a Facade patten for the different commands that the app allows
+    This file is a Facade patten for the different commands of the app.
+    Any new command would implicate to add a new point in this class.
 """
 # ---------------------------------------------------------------------------
 # Imports
 # ---------------------------------------------------------------------------
 import typer
-from regression import regression, set_seed
-from prepare_data import prepare_data
+from commands.regression import regression, set_seed
+from commands.prepare_data import prepare_data
 from util.common import set_seed
 
 # ---------------------------------------------------------------------------
@@ -52,14 +53,6 @@ def cmd_prepare_data(file:str,
                 ):
     prepare_data(file, n_splits, seed, output_folder)
 
-
-@app.callback
-def callback():
-    """
-        This command allows to operate over a problem to prepate them or
-        execute some preliminary test
-    """
-    pass
 
 if __name__ == "__main__":
     app()
