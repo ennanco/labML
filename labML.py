@@ -8,9 +8,9 @@
 # Imports
 # ---------------------------------------------------------------------------
 import typer
-from commands.regression import regression, set_seed
+from commands.regression import regression
 from commands.prepare_data import prepare_data
-from util.common import set_seed
+from commands.util.common import set_seed
 
 # ---------------------------------------------------------------------------
 # Meta-information

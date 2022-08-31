@@ -20,8 +20,7 @@ from sklearn.impute import KNNImputer
 
 
 #Import of own libreries
-from util.common import set_seed
-from util.cli_report import (screen_header, report,
+from .util.cli_report import (screen_header, report,
                         report_arguments, report_output)
 
 @report_arguments(label=None)
@@ -50,7 +49,6 @@ def split_data(data:pd.DataFrame, n_splits:int, seed=None):
 def prepare_data(file:str,
                  n_splits:int=10,
                  seed:int=typer.Option(None,
-                                       callback=set_seed,
                                        help='set the random seed for any split'),
                  output_folder:str = typer.Option('_partition_',
                                                  help='Output for the partitions')

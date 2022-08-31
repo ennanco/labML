@@ -45,8 +45,7 @@ from sklearn.feature_selection import SelectPercentile, f_regression, mutual_inf
 
 
 #Import of own libreries
-from util.common import set_seed
-from util.cli_report import (screen_header, report,
+from .util.cli_report import (screen_header, report,
                         report_arguments, report_output)
 
 
