@@ -21,3 +21,4 @@ After that, the researcher is encourage to explore a fine-tuning of the more pro
 * pathlib
 * rich
 * typer
+* poetry (for package manament, so it is optional but highly recomended)
