@@ -1,4 +1,4 @@
-![GitHub](https://img.shields.io/github/license/ennanco/MIA_ML1?style=flat-square) ![Python](https://img.shields.io/badge/Python-1.7.2-blue?logo=Python)
+![GitHub](https://img.shields.io/github/license/ennanco/MIA_ML1?style=flat-square) ![Python](https://img.shields.io/badge/Python-3.9.0-blue?logo=Python)
 # Laboratory of Machine Learning
 
 This commandline app is dedsign to perform some easy test on a problem by applying several machine learning techniques. Nowadays the app has only two command:
