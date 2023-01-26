@@ -1,7 +1,7 @@
 [tool.poetry]
 name = "labML"
 version = "0.1.0"
-description = "An simple commandline tool to execute some machine learning approaches in a water quality problem"
+description = "An simple commandline tool to execute some machine learning approaches in regression problems"
 authors = ["Enrique Fernandez-Blanco <enrique.fernandez@udc.es>"]
 license = "MIT"
 readme = "README.md"
@@ -16,6 +16,7 @@ scikit-learn = "^1.1.2"
 rich = "^12.5.1"
 setuptools = "^65.3.0"
 pathlib2 = "^2.3.7.post1"
+openpyxl = "^3.0.10"
 
 
 [tool.poetry.group.dev.dependencies]
