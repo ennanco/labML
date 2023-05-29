@@ -209,7 +209,6 @@ def run_experiments(data, splits):
 def regression(
     datapath: str, seed: int, n_splits: int = 10, output_filename: str = None
 ):
-
     screen_header("Setting up the Laboratory")
     filepath = Path(datapath)
     problem_name = filepath.stem

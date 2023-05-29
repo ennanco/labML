@@ -76,46 +76,190 @@ group_progress = Group(
 
 
 DQO_all_experiments = [
-    ('Nothing', 'PCA', 'RandomForest', make_pipeline(None, PCA(), RandomForestRegressor())),
-    ('Normalizer', 'PCA', 'RandomForest', make_pipeline(Normalizer(), PCA(), RandomForestRegressor())),
-    ('Normalizer', 'PCA', 'Boosting', make_pipeline(Normalizer(), PCA(), GradientBoostingRegressor())),
-    ('StandardScaler', 'PCA', 'MLP', make_pipeline(StandardScaler(), PCA(), MLPRegressor(hidden_layer_sizes=(100,), max_iter=1000, early_stopping=True)))
+    (
+        "Nothing",
+        "PCA",
+        "RandomForest",
+        make_pipeline(None, PCA(), RandomForestRegressor()),
+    ),
+    (
+        "Normalizer",
+        "PCA",
+        "RandomForest",
+        make_pipeline(Normalizer(), PCA(), RandomForestRegressor()),
+    ),
+    (
+        "Normalizer",
+        "PCA",
+        "Boosting",
+        make_pipeline(Normalizer(), PCA(), GradientBoostingRegressor()),
+    ),
+    (
+        "StandardScaler",
+        "PCA",
+        "MLP",
+        make_pipeline(
+            StandardScaler(),
+            PCA(),
+            MLPRegressor(hidden_layer_sizes=(100,), max_iter=1000, early_stopping=True),
+        ),
+    ),
 ]
 
 DQO_RAW_experiments = [
-    ('Nothing', 'PCA', 'RandomForest', make_pipeline(None, PCA(), RandomForestRegressor())),
-    ('Normalizer', 'PCA', 'RandomForest', make_pipeline(Normalizer(), PCA(), RandomForestRegressor())),
-    ('StandardScaler', 'PCA', 'RandomForest', make_pipeline(StandardScaler(), PCA(), RandomForestRegressor()))
+    (
+        "Nothing",
+        "PCA",
+        "RandomForest",
+        make_pipeline(None, PCA(), RandomForestRegressor()),
+    ),
+    (
+        "Normalizer",
+        "PCA",
+        "RandomForest",
+        make_pipeline(Normalizer(), PCA(), RandomForestRegressor()),
+    ),
+    (
+        "StandardScaler",
+        "PCA",
+        "RandomForest",
+        make_pipeline(StandardScaler(), PCA(), RandomForestRegressor()),
+    ),
 ]
 
 DQO_Efluent_experiments = [
-    ('Nothing', 'PCA', 'RandomForest', make_pipeline(None, PCA(), RandomForestRegressor())),
-    ('Normalizer', 'PCA', 'RandomForest', make_pipeline(Normalizer(), PCA(), RandomForestRegressor())),
-    ('Normalizer', 'Nothing', 'Bagging', make_pipeline(Normalizer(), None, BaggingRegressor())),
-    ('Normalizer', 'PCA', 'Boosting', make_pipeline(Normalizer(), PCA(), GradientBoostingRegressor()))
+    (
+        "Nothing",
+        "PCA",
+        "RandomForest",
+        make_pipeline(None, PCA(), RandomForestRegressor()),
+    ),
+    (
+        "Normalizer",
+        "PCA",
+        "RandomForest",
+        make_pipeline(Normalizer(), PCA(), RandomForestRegressor()),
+    ),
+    (
+        "Normalizer",
+        "Nothing",
+        "Bagging",
+        make_pipeline(Normalizer(), None, BaggingRegressor()),
+    ),
+    (
+        "Normalizer",
+        "PCA",
+        "Boosting",
+        make_pipeline(Normalizer(), PCA(), GradientBoostingRegressor()),
+    ),
 ]
 
 SST_all_experiments = [
-    ('Nothing', 'Nothing', 'MLP', make_pipeline(None, None, MLPRegressor(hidden_layer_sizes=(100,), max_iter=1000, early_stopping=True))),
-    ('Nothing', 'PCA', 'MLP', make_pipeline(None, PCA(), MLPRegressor(hidden_layer_sizes=(100,), max_iter=1000, early_stopping=True))),
-    ('StandardScaler', 'PCA', 'MLP', make_pipeline(StandardScaler(), PCA(), MLPRegressor(hidden_layer_sizes=(100,), max_iter=1000, early_stopping=True))),
-    ('StandardScaler', 'Nothing', 'SGD', make_pipeline(StandardScaler(), None, SGDRegressor()))
+    (
+        "Nothing",
+        "Nothing",
+        "MLP",
+        make_pipeline(
+            None,
+            None,
+            MLPRegressor(hidden_layer_sizes=(100,), max_iter=1000, early_stopping=True),
+        ),
+    ),
+    (
+        "Nothing",
+        "PCA",
+        "MLP",
+        make_pipeline(
+            None,
+            PCA(),
+            MLPRegressor(hidden_layer_sizes=(100,), max_iter=1000, early_stopping=True),
+        ),
+    ),
+    (
+        "StandardScaler",
+        "PCA",
+        "MLP",
+        make_pipeline(
+            StandardScaler(),
+            PCA(),
+            MLPRegressor(hidden_layer_sizes=(100,), max_iter=1000, early_stopping=True),
+        ),
+    ),
+    (
+        "StandardScaler",
+        "Nothing",
+        "SGD",
+        make_pipeline(StandardScaler(), None, SGDRegressor()),
+    ),
 ]
 
 SST_RAW_experiments = [
-    ('Nothing', 'Nothing', 'PLS', make_pipeline(None, None, PLSRegression())),
-    ('Normalizer', 'Nothing', 'PLS', make_pipeline(Normalizer(), None, PLSRegression())),
-    ('StandardScaler', 'Nothing', 'PLS',  make_pipeline(StandardScaler(), None, PLSRegression())),
-    ('StandardScaler', 'Nothing', 'SGD',  make_pipeline(StandardScaler(), None, SGDRegressor()))
+    ("Nothing", "Nothing", "PLS", make_pipeline(None, None, PLSRegression())),
+    (
+        "Normalizer",
+        "Nothing",
+        "PLS",
+        make_pipeline(Normalizer(), None, PLSRegression()),
+    ),
+    (
+        "StandardScaler",
+        "Nothing",
+        "PLS",
+        make_pipeline(StandardScaler(), None, PLSRegression()),
+    ),
+    (
+        "StandardScaler",
+        "Nothing",
+        "SGD",
+        make_pipeline(StandardScaler(), None, SGDRegressor()),
+    ),
 ]
 
 SST_Efluent_experiments = [
-    ('Normalizer', 'Nothing', 'RandomForest', make_pipeline(Normalizer(), None, RandomForestRegressor())),
-    ('Normalizer', 'MI', 'RandomForest', make_pipeline(Normalizer(), SelectPercentile(mutual_info_regression, percentile=90), RandomForestRegressor())),
-    ('Normalizer', 'ANOVA', 'Boosting', make_pipeline(Normalizer(), SelectPercentile(f_regression, percentile=90), GradientBoostingRegressor())),
-    ('Normalizer', 'MI', 'PLSRegression',  make_pipeline(Normalizer(), SelectPercentile(mutual_info_regression, percentile=90), PLSRegression())),
-    ('Normalizer', 'PCA', 'Boosting', make_pipeline(Normalizer(), PCA(), GradientBoostingRegressor()))
+    (
+        "Normalizer",
+        "Nothing",
+        "RandomForest",
+        make_pipeline(Normalizer(), None, RandomForestRegressor()),
+    ),
+    (
+        "Normalizer",
+        "MI",
+        "RandomForest",
+        make_pipeline(
+            Normalizer(),
+            SelectPercentile(mutual_info_regression, percentile=90),
+            RandomForestRegressor(),
+        ),
+    ),
+    (
+        "Normalizer",
+        "ANOVA",
+        "Boosting",
+        make_pipeline(
+            Normalizer(),
+            SelectPercentile(f_regression, percentile=90),
+            GradientBoostingRegressor(),
+        ),
+    ),
+    (
+        "Normalizer",
+        "MI",
+        "PLSRegression",
+        make_pipeline(
+            Normalizer(),
+            SelectPercentile(mutual_info_regression, percentile=90),
+            PLSRegression(),
+        ),
+    ),
+    (
+        "Normalizer",
+        "PCA",
+        "Boosting",
+        make_pipeline(Normalizer(), PCA(), GradientBoostingRegressor()),
+    ),
 ]
+
 
 @report_arguments(label=None)
 def load_data(filepath: Path) -> pd.DataFrame:
@@ -139,14 +283,18 @@ def prepare_data(data: pd.DataFrame, split: int, seed=None, index_file=None):
     if index_file:
         indexes = np.loadtxt(index_file).astype("int")
         data = data.reset_index()
-        train_indexes = indexes !=split
+        train_indexes = indexes != split
         test_indexes = indexes == split
 
-        train_input, train_output = data_input[train_indexes], data_output[train_indexes]
+        train_input, train_output = (
+            data_input[train_indexes],
+            data_output[train_indexes],
+        )
         test_input, test_output = data_input[test_indexes], data_output[test_indexes]
     else:
-        train_input,test_input, train_output, test_output = train_test_split(data_input, data_output, test_size = 0.1,
-                                                                                    random_state = seed)
+        train_input, test_input, train_output, test_output = train_test_split(
+            data_input, data_output, test_size=0.1, random_state=seed
+        )
 
     return train_input, train_output, test_input, test_output
 
@@ -154,14 +302,16 @@ def prepare_data(data: pd.DataFrame, split: int, seed=None, index_file=None):
 def run_experiments(water, train_input, train_output, test_input, test_output):
     # Definir las posibles combinaciones
     experiments = {
-        'all': SST_all_experiments,
-        'Raw': SST_RAW_experiments,
-        'Efluent': SST_Efluent_experiments
+        "all": SST_all_experiments,
+        "Raw": SST_RAW_experiments,
+        "Efluent": SST_Efluent_experiments,
     }
 
     test_number = len(experiments[water])
 
-    results = pd.DataFrame(columns=["scale", "preprocess", "regressor", "Lab measure", "Prediction"])
+    results = pd.DataFrame(
+        columns=["scale", "preprocess", "regressor", "Lab measure", "Prediction"]
+    )
 
     with Live(group_progress):
         id_overall = overall_progress.add_task("", total=test_number)
@@ -176,7 +326,7 @@ def run_experiments(water, train_input, train_output, test_input, test_output):
                 id_overall,
                 description=f"{len(completed_experiments)} of {test_number} Experiments Completed",
             )
-            #Generate the id to show the experiment that is running
+            # Generate the id to show the experiment that is running
             id_experiment = experiment_progress.add_task(
                 f"[red]({scale}->{preprocess}->{regressor})[/red]"
             )
@@ -217,7 +367,6 @@ def run_experiments(water, train_input, train_output, test_input, test_output):
 def get_results_partition(
     datapath: str, seed: int, partition: int = 0, output_filename: str = None
 ):
-
     screen_header("Setting up the Laboratory")
     filepath = Path(datapath)
     problem_name = filepath.stem
@@ -231,10 +380,11 @@ def get_results_partition(
         return
 
     screen_header("Starting Experiments")
-    results_filename = (output_filename
+    results_filename = (
+        output_filename
         if output_filename
-        else  f'{datetime.today().strftime("%Y%m%d")}_{problem_name}_results.xlsx'
-        )
+        else f'{datetime.today().strftime("%Y%m%d")}_{problem_name}_results.xlsx'
+    )
     print(f"Results file name {results_filename}")
 
     origins = np.append(data["Origen"].unique(), None)
@@ -264,7 +414,9 @@ def get_results_partition(
                     seed=seed,
                     index_file=str(partition_file_name),
                 )
-                results = run_experiments(water, train_input, train_output, test_input, test_output)
+                results = run_experiments(
+                    water, train_input, train_output, test_input, test_output
+                )
                 results.to_excel(writer, sheet_name=f"{partition_name}")
             partition_progress.stop_task(id_partition)
             partition_progress.update(

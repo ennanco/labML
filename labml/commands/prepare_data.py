@@ -52,7 +52,6 @@ def prepare_data(
     seed: int = typer.Option(None, help="set the random seed for any split"),
     output_folder: str = typer.Option("_partition_", help="Output for the partitions"),
 ):
-
     filepath = Path(file)
     PROBLEM = filepath.stem
 
@@ -84,7 +83,7 @@ def prepare_data(
         if partition.shape[0] > 0:
             splits, partition = split_data(partition, n_splits=n_splits, seed=seed)
             partitions = np.zeros(len(partition[1]), dtype=int)
-            for (id_partition, (train, test)) in enumerate(splits):
+            for id_partition, (train, test) in enumerate(splits):
                 partitions[list(test)] = id_partition
 
             np.savetxt(
