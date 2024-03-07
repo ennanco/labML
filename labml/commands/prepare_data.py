@@ -38,7 +38,7 @@ def load_data(filepath: Path) -> pd.DataFrame:
 @report_arguments(label=None)
 def split_data(data: pd.DataFrame, n_splits: int, seed=None):
     X = data.iloc[:, 6:-1]
-    y = data.iloc[:, 5].ravel()
+    y = data.iloc[:, 5].to_numpy()
     X = X.astype("float64")
     cv = KFold(n_splits=n_splits, shuffle=True, random_state=seed)
     splits = cv.split(X, y)
@@ -50,7 +50,7 @@ def prepare_data(
     file: str,
     n_splits: int = 10,
     seed: int = typer.Option(None, help="set the random seed for any split"),
-    output_folder: str = typer.Option("_partition_", help="Output for the partitions"),
+    output_folder: str = typer.Option("_partitions_", help="Output for the partitions"),
 ):
     filepath = Path(file)
     PROBLEM = filepath.stem

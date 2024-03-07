@@ -118,7 +118,7 @@ def load_data(filepath: Path) -> pd.DataFrame:
 @report_arguments(label=None)
 def prepare_data(data: pd.DataFrame, n_splits: int, seed=None, index_file=None):
     X = data.iloc[:, 6:]
-    y = data.iloc[:, 5].ravel()
+    y = data.iloc[:, 5].to_numpy()
     X = X.astype("float64")
     if index_file:
         indexes = np.loadtxt(index_file).astype("int")
@@ -201,7 +201,7 @@ def run_experiments(data, splits):
         overall_progress.update(id_overall, visible=False)
 
         # Plain the results making a row for each test, it takes care to pair both colunms
-        results = results.apply(pd.Series.explode)
+        results = results.explode(['R2','RMSE'])
 
     return results
 
@@ -256,10 +256,10 @@ def regression(
                     index_file=str(partition_file_name),
                 )
                 results = run_experiments(partition, splits)
-                results.to_excel(writer, f"{partition_name}_tests")
+                results.to_excel(writer, sheet_name=f"{partition_name}_tests")
                 results.groupby(["scale", "preprocess", "regressor"]).agg(
                     ["mean", "std"]
-                ).to_excel(writer, f"{partition_name}")
+                ).to_excel(writer, sheet_name=f"{partition_name}")
             partition_progress.stop_task(id_partition)
             partition_progress.update(
                 id_partition, description=f"[green]{partition_name}[/green]"
