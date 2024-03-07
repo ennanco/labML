@@ -7,6 +7,7 @@
 
     This library requires the rich library for its behaviout
 """
+
 from rich import print
 from functools import wraps
 

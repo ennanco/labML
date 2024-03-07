@@ -86,7 +86,7 @@ preprocesses = {
     "Nothing": None,
     "PCA": PCA(),
     "F-score": SelectPercentile(f_regression, percentile=90),
-    "MI": SelectPercentile(mutual_info_regression, percentile=90)
+    "MI": SelectPercentile(mutual_info_regression, percentile=90),
     # TODO posibilidad de implementar un autoencoder para reducir la dimanesionalidad
 }
 
@@ -98,7 +98,7 @@ regressors = {
     "Bagging": BaggingRegressor(),
     "Boosting": GradientBoostingRegressor(),
     "RandomForest": RandomForestRegressor(),
-    "MLP": MLPRegressor(hidden_layer_sizes=(100,), max_iter=1000, early_stopping=True)
+    "MLP": MLPRegressor(hidden_layer_sizes=(100,), max_iter=1000, early_stopping=True),
     # TODO implementar clase para una red convolucional sencilla
 }
 
@@ -201,7 +201,7 @@ def run_experiments(data, splits):
         overall_progress.update(id_overall, visible=False)
 
         # Plain the results making a row for each test, it takes care to pair both colunms
-        results = results.explode(['R2','RMSE'])
+        results = results.explode(["R2", "RMSE"])
 
     return results
 
