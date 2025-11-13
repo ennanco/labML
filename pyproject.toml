@@ -1,27 +1,33 @@
-[tool.poetry]
+[project]
 name = "labML"
 version = "0.1.0"
 description = "An simple commandline tool to execute some machine learning approaches in regression problems"
-authors = ["Enrique Fernandez-Blanco <enrique.fernandez@udc.es>"]
-license = "MIT"
 readme = "README.md"
+requires-python = ">=3.9.0,<3.12"
 
-[tool.poetry.dependencies]
-python = ">=3.9.0,<3.12"
-numpy = "^1.23.2"
-scipy = "^1.9.1"
-pandas = "^1.4.4"
-typer = "^0.6.1"
-scikit-learn = "^1.1.2"
-rich = "^12.5.1"
-setuptools = "^65.3.0"
-pathlib2 = "^2.3.7.post1"
-openpyxl = "^3.0.10"
+license = { text = "MIT" }
 
+authors = [
+  { name = "Enrique Fernandez-Blanco", email = "enrique.fernandez@udc.es" }
+]
 
-[tool.poetry.group.dev.dependencies]
-black = "^22.8.0"
+dependencies = [
+  "numpy>=1.23.2,<2.0.0",
+  "scipy>=1.9.1,<2.0.0",
+  "pandas>=1.4.4,<2.0.0",
+  "typer>=0.6.1,<0.7.0",
+  "scikit-learn>=1.1.2,<2.0.0",
+  "rich>=12.5.1,<13.0.0",
+  "setuptools>=65.3.0,<66.0.0",
+  "pathlib2>=2.3.7.post1,<3.0.0",
+  "openpyxl>=3.0.10,<4.0.0",
+]
+
+[project.optional-dependencies]
+dev = [
+  "black>=22.8.0,<23.0.0",
+]
 
 [build-system]
-requires = ["poetry-core"]
-build-backend = "poetry.core.masonry.api"
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
