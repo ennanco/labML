@@ -117,8 +117,8 @@ def load_data(filepath: Path) -> pd.DataFrame:
 
 @report_arguments(label=None)
 def prepare_data(data: pd.DataFrame, n_splits: int, seed=None, index_file=None):
-    X = data.iloc[:, 6:]
-    y = data.iloc[:, 5].to_numpy()
+    X = data.iloc[:, 7:]
+    y = data.iloc[:, 6].to_numpy()
     X = X.astype("float64")
     if index_file:
         indexes = np.loadtxt(index_file).astype("int")
