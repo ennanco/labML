@@ -34,15 +34,20 @@ There is also an unregistered, standalone script `get_results_partition.py` for 
 
 ## Installation and Usage
 
-1.  Clone the repository to a local folder.
-2.  It is recommended to use a virtual environment.
-3.  Install the dependencies using `uv`:
+1.  Clone the repository.
+2.  Install the dependencies and the command-line tool:
     ```bash
-    uv pip install -e .
+    uv sync
     ```
-4.  Run the application using `python -m labml.labML` or `python labml/labML.py`.
+    > [!NOTE]
+    > After modifying `pyproject.toml` or `setup.py`, you may need to run this command again to make new scripts available.
 
-    For example:
+3.  Run the application:
     ```bash
-    python -m labml.labML regression --help
+    uv run labml --help
+    ```
+
+    For example, to run the regression command:
+    ```bash
+    uv run labml regression --help
     ```
