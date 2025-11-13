@@ -1,11 +1,11 @@
 """
-    This file contains some functions which can be used to
-    create a cli report for example for some experemnts which
-    can go through a long set of steps.
+This file contains some functions which can be used to
+create a cli report for example for some experemnts which
+can go through a long set of steps.
 
-    Author: Enrique Fernandez-Blanco
+Author: Enrique Fernandez-Blanco
 
-    This library requires the rich library for its behaviout
+This library requires the rich library for its behaviout
 """
 
 from rich import print
