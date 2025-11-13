@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-    This file is a Facade patten for the different commands of the app.
-    Any new command would implicate to add a new point in this class.
+This file is a Facade patten for the different commands of the app.
+Any new command would implicate to add a new point in this class.
 """
 # ---------------------------------------------------------------------------
 # Imports
