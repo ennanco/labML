@@ -1,0 +1,42 @@
+# Runnable classification example using the bundled demo dataset.
+[input]
+source = "external"
+data_path = "demo_data_classification.csv"
+target = "quality_class"
+features = ["f1", "f2"]
+
+[partition]
+mode = "group"
+n_splits = 4
+shuffle = true
+random_state = 42
+group_column = "individual_id"
+
+[evaluation]
+n_jobs = 1
+metrics = ["f1_macro", "accuracy"]
+primary_metric = "f1_macro"
+
+[search.scale]
+enabled = ["none", "std"]
+
+[search.filter]
+enabled = ["none"]
+
+[search.reduction]
+enabled = ["none"]
+
+[search.model]
+enabled = ["logreg", "rfc"]
+
+[search.model.params.logreg]
+C = [1.0]
+max_iter = [500]
+
+[search.model.params.rfc]
+n_estimators = [50]
+max_depth = [4]
+
+[output]
+file = "../_artifacts_/benchmarks/demo_classification/results.xlsx"
+latex = false

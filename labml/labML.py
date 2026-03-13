@@ -1,62 +1,69 @@
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-This file is a Facade patten for the different commands of the app.
-Any new command would implicate to add a new point in this class.
-"""
-# ---------------------------------------------------------------------------
-# Imports
-# ---------------------------------------------------------------------------
+"""Main CLI entrypoint for labML."""
+
+from pathlib import Path
+
 import typer
-from commands.regression import regression
-from commands.prepare_data import prepare_data
-from commands.util.common import set_seed
 
-# ---------------------------------------------------------------------------
-# Meta-information
-# ---------------------------------------------------------------------------
-__author__ = "Enrique Fernandez-Blanco"
-__copyright__ = "Copyright 2022, Enrique Fernandez-Blanco"
-__credits__ = ["Enrique Fernandez Blanco"]
-__license__ = "MIT"
-__version__ = "0.1.0"
-__maintainer__ = "Enrique Fernandez-Blanco"
-__email__ = "enrique.fernandez@udc.es"
-__status__ = "Prototype"
+from .core.benchmark import inspect_benchmark, run_benchmark
+from .core.prepare import run_prepare
 
-# ---------------------------------------------------------------------------
-# Create the App
-# ---------------------------------------------------------------------------
-app = typer.Typer()
-""" This is the app based on typer for CLI applications"""
+app = typer.Typer(help="Config-driven ML experimentation tool.")
 
 
-@app.command(name="regression")
-def cmd_regression(
-    datapath: str,
-    seed: int = typer.Option(
-        None,
-        help="Fixing the seed to this value to train and to split the dataset",
-        callback=set_seed,
+@app.command(name="prepare")
+def cmd_prepare(
+    config: Path = typer.Option(
+        ..., "--config", "-c", help="Path to prepare TOML config"
     ),
-    n_splits: int = typer.Option(
-        10, help="Number of splits to be made in the cross validation"
-    ),
-    output_filename: str = typer.Option(None, help=" Name to give to the results file"),
-):
-    regression(datapath, seed, n_splits, output_filename)
+) -> None:
+    """Run the data preparation stage and create reusable artifacts."""
+    run_prepare(config)
 
 
-@app.command(name="prepare_data")
-def cmd_prepare_data(
-    file: str,
-    n_splits: int = 10,
-    seed: int = typer.Option(
-        None, callback=set_seed, help="set the random seed for any split"
+@app.command(name="benchmark-regression")
+def cmd_benchmark_regression(
+    config: Path = typer.Option(
+        ..., "--config", "-c", help="Path to benchmark TOML config"
     ),
-    output_folder: str = typer.Option("_partition_", help="Output for the partitions"),
-):
-    prepare_data(file, n_splits, seed, output_folder)
+    dry_run: bool = typer.Option(
+        False,
+        "--dry-run",
+        help="Validate config and show execution plan without training",
+    ),
+) -> None:
+    """Run configured regression benchmark combinations."""
+    run_benchmark(config, task="regression", dry_run=dry_run)
+
+
+@app.command(name="benchmark-classification")
+def cmd_benchmark_classification(
+    config: Path = typer.Option(
+        ..., "--config", "-c", help="Path to benchmark TOML config"
+    ),
+    dry_run: bool = typer.Option(
+        False,
+        "--dry-run",
+        help="Validate config and show execution plan without training",
+    ),
+) -> None:
+    """Run configured classification benchmark combinations."""
+    run_benchmark(config, task="classification", dry_run=dry_run)
+
+
+@app.command(name="inspect-config")
+def cmd_inspect_config(
+    config: Path = typer.Option(
+        ..., "--config", "-c", help="Path to benchmark TOML config"
+    ),
+    task: str = typer.Option(
+        ..., "--task", "-t", help="Benchmark task: regression or classification"
+    ),
+) -> None:
+    """Inspect benchmark config and estimate execution cost."""
+    normalized_task = task.strip().lower()
+    if normalized_task not in {"regression", "classification"}:
+        raise typer.BadParameter("--task must be 'regression' or 'classification'")
+    inspect_benchmark(config, task=normalized_task)
 
 
 if __name__ == "__main__":

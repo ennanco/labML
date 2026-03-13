@@ -1,0 +1,37 @@
+[input]
+source = "prepared"
+data_path = "../_artifacts_/prepared/demo/data.parquet"
+folds_path = "../_artifacts_/prepared/demo/folds.csv"
+metadata_path = "../_artifacts_/prepared/demo/metadata.json"
+target = "target"
+features = ["f1", "f2"]
+
+[evaluation]
+n_jobs = 1
+metrics = ["neg_root_mean_squared_error", "r2"]
+primary_metric = "neg_root_mean_squared_error"
+
+[search.scale]
+enabled = ["none", "norm"]
+
+[search.filter]
+enabled = ["none"]
+
+[search.reduction]
+enabled = ["none", "pca"]
+
+[search.reduction.params.pca]
+n_components = [1]
+
+[search.model]
+enabled = ["pls", "rf"]
+
+[search.model.params.pls]
+n_components = [1]
+
+[search.model.params.rf]
+n_estimators = [50]
+max_depth = [5]
+
+[output]
+file = "../_artifacts_/benchmarks/demo/results.xlsx"

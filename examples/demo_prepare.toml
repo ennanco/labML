@@ -1,0 +1,14 @@
+[input]
+path = "demo_data.csv"
+
+[dataset]
+task = "regression"
+target = "target"
+
+[partition]
+mode = "group"
+n_splits = 4
+group_column = "individual_id"
+
+[output]
+dir = "../_artifacts_/prepared/demo"

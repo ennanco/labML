@@ -1,0 +1,20 @@
+# Runnable prepare example using bundled demo data.
+[input]
+path = "demo_data.csv"
+
+# Optional Python hook: transform(df, params) -> df
+# [hook]
+# path = "user_preprocess.py"
+# function = "transform"
+
+[dataset]
+task = "regression"
+target = "target"
+
+[partition]
+mode = "group"
+n_splits = 4
+group_column = "individual_id"
+
+[output]
+dir = "../_artifacts_/prepared/demo"

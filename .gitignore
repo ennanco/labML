@@ -2,8 +2,16 @@
 # Temporaty files and folders #
 ###############################
 
-**/__pycache__
-_data_/*
+__pycache__/
+**/__pycache__/
+.pytest_cache/
+.ruff_cache/
+.venv/
+labML.egg-info/
+_data_/
+_artifacts_/
+results/
+RESUME.md
 ##################
 # Compiled files #
 ##################

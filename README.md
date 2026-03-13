@@ -1,53 +1,174 @@
-![GitHub](https://img.shields.io/github/license/ennanco/MIA_ML1?style=flat-square) ![Python](https://img.shields.io/badge/Python-3.9.0-blue?logo=Python)
+![GitHub](https://img.shields.io/github/license/ennanco/MIA_ML1?style=flat-square) ![Python](https://img.shields.io/badge/Python-3.11+-blue?logo=Python)
+
 # Laboratory of Machine Learning
 
-This command-line app is designed to perform a battery of regression tests on a specific research dataset. It is not a general-purpose library, but rather a case-study or template for a specific type of analysis.
+![labML CLI demo](labml-demo.gif)
 
-The application has two main commands:
+![labML benchmark progress](labml-progress.gif)
 
--   `prepare-data`: This command generates and saves CSV files containing integer indices for cross-validation folds. It does not save preprocessed data. The logic is tightly coupled to a specific dataset structure, expecting an Excel file where features start at column 6, and the target variable is in column 5.
--   `regression`: This command runs an exhaustive grid search over a hardcoded set of scalers, dimensionality reduction techniques, and regression models. It can either generate cross-validation splits on the fly or use the index files created by the `prepare-data` command.
+labML is a config-driven CLI for reproducible ML experimentation.
+The workflow has two stages: generate reusable artifacts once, then run benchmark combinations for regression or classification.
 
-The result is a general idea of how well these techniques work with different standardization techniques and some dimension reduction on the different machine learning approaches.
+The benchmark internals are now split into focused layers: runtime context building, execution engine, planning/estimation, progress reporting, and output shaping.
 
-After that, the researcher is encouraged to explore a fine-tuning of the more prominent techniques to obtain the best model.
+Current benchmark module layout:
 
-There is also an unregistered, standalone script `get_results_partition.py` for running a manually-defined list of specific pipelines on a single train-test split.
+- `labml/core/benchmark.py`: public API + high-level orchestration.
+- `labml/core/benchmark_models.py`: shared dataclasses/types.
+- `labml/core/benchmark_context.py`: config/input/search expansion and runtime context.
+- `labml/core/benchmark_engine.py`: fold/combinations execution engine.
+- `labml/core/benchmark_plan.py`: `inspect-config` planning and runtime estimation.
+- `labml/core/benchmark_progress.py`: progress reporter interface and Rich/Null implementations.
+- `labml/core/benchmark_results.py`: result aggregation, metadata, and output payload.
 
-## TODO list:
+Public surface note: `labml/core/benchmark.py` is the stable API entrypoint (`run_benchmark`, `inspect_benchmark`). The `benchmark_*` modules are internal implementation modules.
 
-*   [ ] Include a RandomSearch in the process to select also the more prominent approaches
-*   [ ] Add classification techniques
-*   [ ] Make the split and treatment of the problem agnostic of the file.
-*   [ ] Allow the inclusion of other approaches in a more organic way (for example, a config file)
+## Commands
 
-## Dependencies (python)
+- `prepare`: loads input data, applies an optional Python hook, and exports reusable artifacts.
+- `benchmark-regression`: runs configured pipeline combinations for regression.
+- `benchmark-classification`: runs configured pipeline combinations for classification.
+- `inspect-config`: inspects benchmark config and estimates runtime from search space plus machine profile.
 
-*   pandas
-*   numpy
-*   scikit-learn
-*   pathlib
-*   rich
-*   typer
-*   scipy
-*   openpyxl
+Quick command list:
 
-## Installation and Usage
+```bash
+uv run labml --help
+```
 
-1.  Clone the repository.
-2.  Install the dependencies and the command-line tool:
-    ```bash
-    uv sync
-    ```
-    > [!NOTE]
-    > After modifying `pyproject.toml` or `setup.py`, you may need to run this command again to make new scripts available.
+## Installation
 
-3.  Run the application:
-    ```bash
-    uv run labml --help
-    ```
+```bash
+uv sync --extra dev
+```
 
-    For example, to run the regression command:
-    ```bash
-    uv run labml regression --help
-    ```
+## End-to-end usage
+
+Prepare artifacts:
+
+```bash
+uv run labml prepare --config examples/prepare.toml
+```
+
+Run a regression benchmark:
+
+```bash
+uv run labml benchmark-regression --config examples/benchmark_regression.toml
+```
+
+Preview workload without training:
+
+```bash
+uv run labml benchmark-regression --config examples/benchmark_regression.toml --dry-run
+```
+
+Inspect benchmark plan with machine-aware runtime estimate:
+
+```bash
+uv run labml inspect-config --config examples/benchmark_regression.toml --task regression
+```
+
+Run a classification benchmark:
+
+```bash
+uv run labml benchmark-classification --config examples/benchmark_classification.toml
+```
+
+Preview classification workload without training:
+
+```bash
+uv run labml benchmark-classification --config examples/benchmark_classification.toml --dry-run
+```
+
+## Artifacts generated by `prepare`
+
+The prepare stage writes portable files that can be moved to another machine:
+
+- `data.parquet`
+- `folds.csv` (`row_id,fold_id`)
+- `metadata.json`
+
+## Progress interface (benchmark)
+
+During benchmark runs, the CLI shows four live panels:
+
+- `Overall`: global progress over all combinations.
+- `Current Combination`: fold-level progress for the active combination.
+- `Status`: current spinner/status message for the running combination.
+- `Recent Results`: rolling history (last 10) with visual status marks:
+  - `✅` successful combinations
+  - `⚠` skipped combinations
+  - `✖` failed combinations
+
+This makes it easier to know exactly where the run is and what just happened.
+
+From an engineering perspective, benchmark progress is decoupled from execution through a `ProgressReporter` interface. The default CLI experience uses `RichProgressReporter`, and non-interactive contexts can use `NullProgressReporter`.
+
+`[evaluation].n_jobs` is now applied during fold evaluation (`-1` uses all available CPU cores).
+When `n_jobs > 1`, labML also applies an inner parallelism guard: estimators that expose `n_jobs` are forced to `1` unless you explicitly set `n_jobs` for that estimator in the config.
+
+## Excel + LaTeX export
+
+Benchmark outputs are always written to Excel. You can also ask the tool to generate LaTeX `tabular` files ready for `\\input{...}` in your paper.
+
+Example output block:
+
+```toml
+[output]
+file = "_artifacts_/benchmarks/regression/results.xlsx"
+latex = true
+latex_dir = "_artifacts_/benchmarks/regression/latex"
+```
+
+When `latex = true`, the benchmark writes:
+
+- `<excel_stem>_ranking.tex`
+- `<excel_stem>_summary.tex`
+
+Both tables are rendered as `tabular` and rounded to 4 decimals.
+
+## Configuration examples
+
+Ready-to-run examples are in `examples/`:
+
+- `examples/prepare.toml`
+- `examples/benchmark_regression.toml`
+- `examples/benchmark_classification.toml`
+- `examples/demo_data.csv`
+- `examples/demo_data_classification.csv`
+- `examples/demo_prepare.toml`
+- `examples/demo_benchmark_regression.toml`
+- `examples/demo_benchmark_regression_parallel.toml`
+
+These examples are self-contained and runnable from repo root with `uv run labml ...`.
+
+Parameter values support:
+
+- single values (`0.1`)
+- lists (`[0.1, 1.0, 10.0]`)
+- ranges (`"1:0.1:2"`, inclusive)
+
+## Tests
+
+Run all unit and integration tests:
+
+```bash
+uv run pytest
+```
+
+Current status in this repository snapshot: `50 passed`.
+
+## Regenerate demo GIFs
+
+The GIF generation is reproducible and uses FFmpeg.
+
+```bash
+scripts/demo/build_gifs.sh
+```
+
+This command regenerates:
+
+- `labml-demo.gif`
+- `labml-progress.gif`
+
+Both GIFs were regenerated after the benchmark modularization refactor.
