@@ -122,7 +122,9 @@ def test_benchmark_rejects_missing_output_section(tmp_path: Path) -> None:
     base_without_output = base.split("[output]\n", maxsplit=1)[0]
     cfg_path = _write_data_and_config(tmp_path, base_without_output)
 
-    with pytest.raises(typer.BadParameter, match=r"Missing required section \[output\]"):
+    with pytest.raises(
+        typer.BadParameter, match=r"Missing required section \[output\]"
+    ):
         run_benchmark(cfg_path, task="regression")
 
 
@@ -143,7 +145,9 @@ def test_benchmark_rejects_missing_search_section(tmp_path: Path) -> None:
     )
     cfg_path = _write_data_and_config(tmp_path, base_without_search)
 
-    with pytest.raises(typer.BadParameter, match=r"Missing required section \[search\]"):
+    with pytest.raises(
+        typer.BadParameter, match=r"Missing required section \[search\]"
+    ):
         run_benchmark(cfg_path, task="regression")
 
 

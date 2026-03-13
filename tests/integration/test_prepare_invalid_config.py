@@ -15,7 +15,9 @@ def _write_data(tmp_path: Path) -> Path:
     return write_group_regression_data_csv(tmp_path, name="data.csv")
 
 
-def _write_prepare_cfg(tmp_path: Path, text: str, name: str = "prepare_invalid.toml") -> Path:
+def _write_prepare_cfg(
+    tmp_path: Path, text: str, name: str = "prepare_invalid.toml"
+) -> Path:
     return write_config(tmp_path, text, name=name)
 
 
@@ -49,10 +51,7 @@ def test_prepare_rejects_missing_output_section(tmp_path: Path) -> None:
 def test_prepare_rejects_missing_partition_section(tmp_path: Path) -> None:
     data_path = _write_data(tmp_path)
     text = base_prepare_config_text(data_path).replace(
-        "[partition]\n"
-        'mode = "group"\n'
-        "n_splits = 3\n"
-        'group_column = "individual_id"\n\n',
+        '[partition]\nmode = "group"\nn_splits = 3\ngroup_column = "individual_id"\n\n',
         "",
     )
     cfg_path = _write_prepare_cfg(tmp_path, text)
@@ -124,7 +123,7 @@ def test_prepare_rejects_hook_with_missing_function(tmp_path: Path) -> None:
     )
 
     text = base_prepare_config_text(data_path) + (
-        "\n[hook]\n" f'path = "{hook_path.name}"\n' 'function = "not_found"\n'
+        f'\n[hook]\npath = "{hook_path.name}"\nfunction = "not_found"\n'
     )
     cfg_path = _write_prepare_cfg(tmp_path, text)
 
@@ -140,7 +139,7 @@ def test_prepare_rejects_hook_returning_non_dataframe(tmp_path: Path) -> None:
     )
 
     text = base_prepare_config_text(data_path) + (
-        "\n[hook]\n" f'path = "{hook_path.name}"\n' 'function = "transform"\n'
+        f'\n[hook]\npath = "{hook_path.name}"\nfunction = "transform"\n'
     )
     cfg_path = _write_prepare_cfg(tmp_path, text)
 

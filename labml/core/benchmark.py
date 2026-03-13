@@ -40,7 +40,9 @@ def run_benchmark(
         return
 
     context = _build_runtime_context(config_path=config_path, task=task)
-    reporter = progress_reporter if progress_reporter is not None else RichProgressReporter()
+    reporter = (
+        progress_reporter if progress_reporter is not None else RichProgressReporter()
+    )
 
     execution_result = _execute_combinations_with_reporter(
         X=context.X,

@@ -35,7 +35,9 @@ class ProgressReporter(Protocol):
     # Combination-level events
     def start_combination(self, combo_label: str, total_folds: int) -> None: ...
 
-    def on_fold_running(self, combo_label: str, fold_idx: int, total_folds: int) -> None: ...
+    def on_fold_running(
+        self, combo_label: str, fold_idx: int, total_folds: int
+    ) -> None: ...
 
     def on_parallel_start(self, combo_label: str, workers: int) -> None: ...
 
@@ -52,6 +54,7 @@ class ProgressReporter(Protocol):
 
 class NullProgressReporter:
     """No-op reporter used for tests and headless execution."""
+
     def __enter__(self) -> "NullProgressReporter":
         return self
 
@@ -69,7 +72,9 @@ class NullProgressReporter:
     def start_combination(self, combo_label: str, total_folds: int) -> None:
         _ = (combo_label, total_folds)
 
-    def on_fold_running(self, combo_label: str, fold_idx: int, total_folds: int) -> None:
+    def on_fold_running(
+        self, combo_label: str, fold_idx: int, total_folds: int
+    ) -> None:
         _ = (combo_label, fold_idx, total_folds)
 
     def on_parallel_start(self, combo_label: str, workers: int) -> None:
@@ -101,6 +106,7 @@ def _append_fifo(items: list[Any], item: Any, limit: int) -> Any | None:
 
 class RichProgressReporter:
     """Rich terminal reporter with Overall/Current/Status/Recent panels."""
+
     def __init__(self) -> None:
         self.overall_progress = Progress(
             TimeElapsedColumn(), BarColumn(), TextColumn("{task.description}")
@@ -155,7 +161,9 @@ class RichProgressReporter:
             f"0/{total_folds} folds complete", total=total_folds
         )
 
-    def on_fold_running(self, combo_label: str, fold_idx: int, total_folds: int) -> None:
+    def on_fold_running(
+        self, combo_label: str, fold_idx: int, total_folds: int
+    ) -> None:
         """Update textual status while each fold starts in sequential mode."""
         if self.current_task is not None:
             self.current_progress.update(
@@ -175,8 +183,7 @@ class RichProgressReporter:
             self.current_progress.update(
                 self.current_task,
                 description=(
-                    f"Running: {combo_label} - parallel folds "
-                    f"(workers={workers})"
+                    f"Running: {combo_label} - parallel folds (workers={workers})"
                 ),
             )
 
@@ -222,7 +229,9 @@ class RichProgressReporter:
     def on_combination_failed(self, combo_label: str) -> None:
         """Render failed status and register error entry in history."""
         if self.current_task is not None:
-            self.current_progress.update(self.current_task, description=f"Failed: {combo_label}")
+            self.current_progress.update(
+                self.current_task, description=f"Failed: {combo_label}"
+            )
         self._add_recent_result(f"[red]✖ {combo_label}[/red]")
 
     def finish_combination(self, completed_experiments: int) -> None:

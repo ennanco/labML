@@ -46,7 +46,9 @@ class SpyReporter(ProgressReporter):
         _ = total_folds
         self.started_combinations.append(combo_label)
 
-    def on_fold_running(self, combo_label: str, fold_idx: int, total_folds: int) -> None:
+    def on_fold_running(
+        self, combo_label: str, fold_idx: int, total_folds: int
+    ) -> None:
         _ = (combo_label, fold_idx, total_folds)
 
     def on_parallel_start(self, combo_label: str, workers: int) -> None:
@@ -79,7 +81,9 @@ def test_execute_combinations_engine_handles_completed_skipped_and_failed() -> N
     scale_none = StepVariant(key="none", params={}, estimator=None)
     filter_none = StepVariant(key="none", params={}, estimator=None)
     reduction_none = StepVariant(key="none", params={}, estimator=None)
-    reduction_nmf = StepVariant(key="nmf", params={"n_components": 1}, estimator=object())
+    reduction_nmf = StepVariant(
+        key="nmf", params={"n_components": 1}, estimator=object()
+    )
 
     model_ok = StepVariant(
         key="pls",
