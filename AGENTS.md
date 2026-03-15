@@ -2,7 +2,8 @@
 
 ## Estado actual (cierre de sesion)
 
-- Ultimo commit integrado y pusheado: `90befbf` en `main`.
+- Ultimo commit local en `main`: `e7c34a1` (`refactor: harden benchmark contracts and unify CLI entrypoint`).
+- Estado de sincronizacion: rama local adelantada `1` commit sobre `origin/main`.
 - Benchmark refactorizado en modulos:
   - `labml/core/benchmark.py` (API publica)
   - `labml/core/benchmark_context.py`
@@ -14,7 +15,8 @@
 - API publica estable de benchmark:
   - `run_benchmark`
   - `inspect_benchmark`
-- Test suite en verde: `88 passed`.
+- Ultima corrida de tests registrada: `88 passed`.
+- En este cierre no se ejecutan tests por ausencia de cambios de codigo.
 - Ejemplos revisados y ejecutables desde raiz.
 - GIFs regenerados y sincronizados con el estado actual del CLI.
 - Entrypoint principal movido a `labml/cli.py`.
