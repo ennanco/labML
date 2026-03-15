@@ -8,6 +8,7 @@ __pycache__/
 .ruff_cache/
 .venv/
 .agents/
+AGENTS.md
 labML.egg-info/
 _data_/
 _artifacts_/
