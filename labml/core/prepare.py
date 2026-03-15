@@ -22,9 +22,10 @@ def run_prepare(config_path: Path) -> None:
     output_cfg = require_section(config, "output")
     partition_cfg = require_section(config, "partition")
 
-    data_path = resolve_path(base_dir, str(input_cfg.get("path", "")))
-    if not data_path:
+    raw_data_path = input_cfg.get("path")
+    if raw_data_path is None or not str(raw_data_path).strip():
         raise typer.BadParameter("Missing [input].path")
+    data_path = resolve_path(base_dir, str(raw_data_path))
 
     sheet = input_cfg.get("sheet")
     data = load_table(data_path, sheet=sheet)

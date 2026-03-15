@@ -10,6 +10,11 @@ from sklearn.base import clone
 from sklearn.pipeline import Pipeline
 
 from .benchmark_context import _build_pipeline, _can_run_nmf
+from .errors import (
+    ERROR_TYPE_INCOMPATIBLE_COMBO,
+    ERROR_TYPE_MODEL_EXECUTION,
+    ModelExecutionError,
+)
 from .benchmark_models import BenchmarkExecutionResult, StepVariant
 from .benchmark_progress import NullProgressReporter, ProgressReporter
 
@@ -31,13 +36,16 @@ def _evaluate_fold(
     X_test = X.iloc[test_idx]
     y_test = y.iloc[test_idx]
 
-    estimator.fit(X_train, y_train)
+    try:
+        estimator.fit(X_train, y_train)
 
-    row = {**combo, "fold": fold_idx}
-    for metric, scorer in scorers.items():
-        value = float(scorer(estimator, X_test, y_test))
-        row[metric] = value
-    return row
+        row = {**combo, "fold": fold_idx}
+        for metric, scorer in scorers.items():
+            value = float(scorer(estimator, X_test, y_test))
+            row[metric] = value
+        return row
+    except Exception as exc:
+        raise ModelExecutionError(str(exc)) from exc
 
 
 def _guard_variant_inner_n_jobs(
@@ -168,16 +176,22 @@ def _execute_combinations_with_reporter(
             )
             reporter.start_combination(combo_label=combo_label, total_folds=len(splits))
 
-            if not can_run:
-                failed_rows.append({**combo, "status": "skipped", "reason": reason})
-                reporter.on_combination_skipped(combo_label)
-                reporter.finish_combination(completed_experiments=experiment_id)
-                continue
-
-            pipeline = _build_pipeline(
-                guarded_scale, guarded_filter, guarded_reduction, guarded_model
-            )
             try:
+                if not can_run:
+                    failed_rows.append(
+                        {
+                            **combo,
+                            "status": "skipped",
+                            "error_type": ERROR_TYPE_INCOMPATIBLE_COMBO,
+                            "reason": reason,
+                        }
+                    )
+                    reporter.on_combination_skipped(combo_label)
+                    continue
+
+                pipeline = _build_pipeline(
+                    guarded_scale, guarded_filter, guarded_reduction, guarded_model
+                )
                 if effective_n_jobs == 1:
                     for fold_idx, (train_idx, test_idx) in enumerate(splits):
                         reporter.on_fold_running(
@@ -232,11 +246,21 @@ def _execute_combinations_with_reporter(
                             )
 
                 reporter.on_combination_completed(combo_label)
-            except Exception as exc:
-                failed_rows.append({**combo, "status": "failed", "reason": str(exc)})
+            except ModelExecutionError as exc:
+                failed_rows.append(
+                    {
+                        **combo,
+                        "status": "failed",
+                        "error_type": ERROR_TYPE_MODEL_EXECUTION,
+                        "reason": str(exc),
+                    }
+                )
                 reporter.on_combination_failed(combo_label)
-
-            reporter.finish_combination(completed_experiments=experiment_id)
+            except Exception:
+                reporter.on_combination_failed(combo_label)
+                raise
+            finally:
+                reporter.finish_combination(completed_experiments=experiment_id)
 
     return BenchmarkExecutionResult(
         detailed_rows=detailed_rows,

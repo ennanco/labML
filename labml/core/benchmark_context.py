@@ -96,9 +96,10 @@ def _prepare_input(
     input_cfg = require_section(config, "input")
     source = str(input_cfg.get("source", "prepared"))
 
-    data_path = resolve_path(base_dir, str(input_cfg.get("data_path", "")))
-    if not data_path:
+    raw_data_path = input_cfg.get("data_path")
+    if raw_data_path is None or not str(raw_data_path).strip():
         raise typer.BadParameter("Missing [input].data_path")
+    data_path = resolve_path(base_dir, str(raw_data_path))
     data = cast(pd.DataFrame, load_table(data_path))
 
     metadata_path = input_cfg.get("metadata_path")

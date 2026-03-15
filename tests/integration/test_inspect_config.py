@@ -4,7 +4,7 @@ import re
 import pandas as pd
 from typer.testing import CliRunner
 
-from labml.labML import app
+from labml.cli import app
 
 
 def test_inspect_config_outputs_time_estimate(tmp_path: Path) -> None:

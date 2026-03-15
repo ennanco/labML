@@ -233,15 +233,10 @@ def test_regression_nmf_incompatible_combo_is_reported_as_skipped(
     run_benchmark(benchmark_cfg, task="regression")
     failed_df = pd.read_excel(tmp_path / "nmf_results.xlsx", sheet_name="failed")
     assert (failed_df["status"] == "skipped").any()
+    assert (failed_df["error_type"] == "incompatible_combo").any()
     assert failed_df["reason"].str.contains("NMF skipped", regex=False).any()
 
 
-@pytest.mark.filterwarnings(
-    "ignore:np.find_common_type is deprecated.*:DeprecationWarning"
-)
-@pytest.mark.filterwarnings(
-    "ignore:In future versions `DataFrame.to_latex` is expected.*:FutureWarning"
-)
 def test_regression_benchmark_generates_latex_tabular_files(tmp_path: Path) -> None:
     data = pd.DataFrame(
         {

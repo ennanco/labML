@@ -50,7 +50,7 @@ def _build_summary_latex_table(
 
 def _write_latex_tabular(df: pd.DataFrame, output_path: Path) -> None:
     output_path.parent.mkdir(parents=True, exist_ok=True)
-    latex = df.to_latex(index=False, escape=True)
+    latex = df.style.hide(axis="index").to_latex()
     output_path.write_text(latex, encoding="utf-8")
 
 

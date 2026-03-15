@@ -107,9 +107,21 @@ From an engineering perspective, benchmark progress is decoupled from execution 
 `[evaluation].n_jobs` is now applied during fold evaluation (`-1` uses all available CPU cores).
 When `n_jobs > 1`, labML also applies an inner parallelism guard: estimators that expose `n_jobs` are forced to `1` unless you explicitly set `n_jobs` for that estimator in the config.
 
+## Error taxonomy (benchmark)
+
+Benchmark failures are classified with stable `error_type` values in the `failed` sheet:
+
+- `incompatible_combo`: expected skips (for example, incompatible NMF combinations).
+- `model_execution`: recoverable model fit/score errors for one combination.
+- `internal`: unexpected internal errors (propagated fail-fast).
+
+Configuration/data errors (`config_data`) fail fast before execution starts and do not generate output files.
+
 ## Excel + LaTeX export
 
 Benchmark outputs are always written to Excel. You can also ask the tool to generate LaTeX `tabular` files ready for `\\input{...}` in your paper.
+
+LaTeX export uses pandas Styler rendering (via `Jinja2`, included in project dependencies).
 
 Example output block:
 
@@ -153,10 +165,10 @@ Parameter values support:
 Run all unit and integration tests:
 
 ```bash
-uv run pytest
+uv run python -m pytest -q
 ```
 
-Current status in this repository snapshot: `50 passed`.
+Current status in this repository snapshot: `88 passed`.
 
 ## Regenerate demo GIFs
 
@@ -170,5 +182,3 @@ This command regenerates:
 
 - `labml-demo.gif`
 - `labml-progress.gif`
-
-Both GIFs were regenerated after the benchmark modularization refactor.

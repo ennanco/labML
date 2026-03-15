@@ -4,6 +4,7 @@ from dataclasses import dataclass, field
 
 import numpy as np
 import pandas as pd
+import pytest
 from sklearn.base import BaseEstimator, RegressorMixin
 from sklearn.cross_decomposition import PLSRegression
 from sklearn.metrics import get_scorer
@@ -120,8 +121,49 @@ def test_execute_combinations_engine_handles_completed_skipped_and_failed() -> N
     assert len(result.failed_rows) == 2
     assert any(row["status"] == "skipped" for row in result.failed_rows)
     assert any(row["status"] == "failed" for row in result.failed_rows)
+    assert any(row["error_type"] == "incompatible_combo" for row in result.failed_rows)
+    assert any(row["error_type"] == "model_execution" for row in result.failed_rows)
     assert reporter.starts == [(3, 2)]
     assert len(reporter.completed) == 1
     assert len(reporter.skipped) == 1
     assert len(reporter.failed) == 1
     assert reporter.finished == [1, 2, 3]
+
+
+def test_execute_combinations_engine_reraises_internal_errors(monkeypatch: pytest.MonkeyPatch) -> None:
+    X = pd.DataFrame({"f1": [1.0, 2.0, 3.0, 4.0], "f2": [2.0, 3.0, 4.0, 5.0]})
+    y = pd.Series([3.0, 5.0, 7.0, 9.0])
+    splits = [
+        (np.array([0, 1]), np.array([2, 3])),
+        (np.array([2, 3]), np.array([0, 1])),
+    ]
+
+    scale_none = StepVariant(key="none", params={}, estimator=None)
+    filter_none = StepVariant(key="none", params={}, estimator=None)
+    reduction_none = StepVariant(key="none", params={}, estimator=None)
+    model_ok = StepVariant(
+        key="pls",
+        params={"n_components": 1},
+        estimator=PLSRegression(n_components=1),
+    )
+
+    all_combinations = [(scale_none, filter_none, reduction_none, model_ok)]
+    scorers = {"r2": get_scorer("r2")}
+    reporter = SpyReporter()
+
+    def _boom(*args: object, **kwargs: object) -> object:
+        _ = (args, kwargs)
+        raise RuntimeError("internal boom")
+
+    monkeypatch.setattr("labml.core.benchmark_engine._build_pipeline", _boom)
+
+    with pytest.raises(RuntimeError, match="internal boom"):
+        _execute_combinations_with_reporter(
+            X=X,
+            y=y,
+            splits=splits,
+            all_combinations=all_combinations,
+            scorers=scorers,
+            effective_n_jobs=1,
+            reporter=reporter,
+        )

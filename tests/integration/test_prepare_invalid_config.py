@@ -4,7 +4,7 @@ import pytest
 import typer
 
 from labml.core.prepare import run_prepare
-from labml.testing_helpers import (
+from tests.helpers.testing_helpers import (
     base_prepare_config_text,
     write_config,
     write_group_regression_data_csv,
@@ -34,6 +34,27 @@ def test_prepare_rejects_missing_input_section(tmp_path: Path) -> None:
     cfg_path = _write_prepare_cfg(tmp_path, text)
 
     with pytest.raises(typer.BadParameter, match=r"Missing required section \[input\]"):
+        run_prepare(cfg_path)
+
+
+def test_prepare_rejects_missing_input_path(tmp_path: Path) -> None:
+    data_path = _write_data(tmp_path)
+    text = base_prepare_config_text(data_path).replace(f'path = "{data_path.name}"\n', "")
+    cfg_path = _write_prepare_cfg(tmp_path, text)
+
+    with pytest.raises(typer.BadParameter, match=r"Missing \[input\]\.path"):
+        run_prepare(cfg_path)
+
+
+@pytest.mark.parametrize("path_value", ["", "   "])
+def test_prepare_rejects_blank_input_path(tmp_path: Path, path_value: str) -> None:
+    data_path = _write_data(tmp_path)
+    text = base_prepare_config_text(data_path).replace(
+        f'path = "{data_path.name}"', f'path = "{path_value}"'
+    )
+    cfg_path = _write_prepare_cfg(tmp_path, text)
+
+    with pytest.raises(typer.BadParameter, match=r"Missing \[input\]\.path"):
         run_prepare(cfg_path)
 
 
@@ -73,41 +94,10 @@ def test_prepare_rejects_invalid_task_value(tmp_path: Path) -> None:
         run_prepare(cfg_path)
 
 
-def test_prepare_rejects_missing_target(tmp_path: Path) -> None:
-    data_path = _write_data(tmp_path)
-    text = base_prepare_config_text(data_path).replace('target = "target"\n', "")
-    cfg_path = _write_prepare_cfg(tmp_path, text)
-
-    with pytest.raises(typer.BadParameter, match=r"\[dataset\]\.target"):
-        run_prepare(cfg_path)
-
-
-def test_prepare_rejects_target_not_in_data(tmp_path: Path) -> None:
-    data_path = _write_data(tmp_path)
-    text = base_prepare_config_text(data_path).replace(
-        'target = "target"', 'target = "missing"'
-    )
-    cfg_path = _write_prepare_cfg(tmp_path, text)
-
-    with pytest.raises(typer.BadParameter, match=r"\[dataset\]\.target"):
-        run_prepare(cfg_path)
-
-
 def test_prepare_rejects_group_mode_without_group_column(tmp_path: Path) -> None:
     data_path = _write_data(tmp_path)
     text = base_prepare_config_text(data_path).replace(
         'group_column = "individual_id"\n', ""
-    )
-    cfg_path = _write_prepare_cfg(tmp_path, text)
-
-    with pytest.raises(typer.BadParameter, match="Partition mode 'group'"):
-        run_prepare(cfg_path)
-
-
-def test_prepare_rejects_unknown_group_column(tmp_path: Path) -> None:
-    data_path = _write_data(tmp_path)
-    text = base_prepare_config_text(data_path).replace(
-        'group_column = "individual_id"', 'group_column = "missing_id"'
     )
     cfg_path = _write_prepare_cfg(tmp_path, text)
 

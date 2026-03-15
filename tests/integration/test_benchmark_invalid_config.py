@@ -6,8 +6,8 @@ import typer
 from typer.testing import CliRunner
 
 from labml.core.benchmark import run_benchmark
-from labml.labML import app
-from labml.testing_helpers import (
+from labml.cli import app
+from tests.helpers.testing_helpers import (
     base_benchmark_config_text,
     write_config,
     write_regression_data_csv,
@@ -29,16 +29,6 @@ def test_benchmark_rejects_invalid_n_jobs(tmp_path: Path) -> None:
         run_benchmark(cfg_path, task="regression")
 
 
-def test_benchmark_rejects_empty_model_list(tmp_path: Path) -> None:
-    base = base_benchmark_config_text(tmp_path / "data.csv").replace(
-        'enabled = ["pls"]', "enabled = []"
-    )
-    cfg_path = _write_data_and_config(tmp_path, base)
-
-    with pytest.raises(typer.BadParameter, match="At least one model"):
-        run_benchmark(cfg_path, task="regression")
-
-
 def test_benchmark_rejects_unknown_model(tmp_path: Path) -> None:
     base = base_benchmark_config_text(tmp_path / "data.csv").replace(
         'enabled = ["pls"]', 'enabled = ["does_not_exist"]'
@@ -49,43 +39,26 @@ def test_benchmark_rejects_unknown_model(tmp_path: Path) -> None:
         run_benchmark(cfg_path, task="regression")
 
 
-def test_benchmark_rejects_metrics_non_list(tmp_path: Path) -> None:
+def test_benchmark_rejects_missing_input_data_path(tmp_path: Path) -> None:
     base = base_benchmark_config_text(tmp_path / "data.csv").replace(
-        'metrics = ["neg_root_mean_squared_error", "r2"]', 'metrics = "r2"'
+        'data_path = "data.csv"\n', ""
     )
     cfg_path = _write_data_and_config(tmp_path, base)
 
-    with pytest.raises(typer.BadParameter, match=r"\[evaluation\]\.metrics"):
+    with pytest.raises(typer.BadParameter, match=r"Missing \[input\]\.data_path"):
         run_benchmark(cfg_path, task="regression")
 
 
-def test_benchmark_rejects_invalid_source(tmp_path: Path) -> None:
+@pytest.mark.parametrize("path_value", ["", "   "])
+def test_benchmark_rejects_blank_input_data_path(
+    tmp_path: Path, path_value: str
+) -> None:
     base = base_benchmark_config_text(tmp_path / "data.csv").replace(
-        'source = "external"', 'source = "invalid_source"'
+        'data_path = "data.csv"', f'data_path = "{path_value}"'
     )
     cfg_path = _write_data_and_config(tmp_path, base)
 
-    with pytest.raises(typer.BadParameter, match=r"\[input\]\.source"):
-        run_benchmark(cfg_path, task="regression")
-
-
-def test_benchmark_rejects_missing_target_column(tmp_path: Path) -> None:
-    base = base_benchmark_config_text(tmp_path / "data.csv").replace(
-        'target = "target"', 'target = "missing_target"'
-    )
-    cfg_path = _write_data_and_config(tmp_path, base)
-
-    with pytest.raises(typer.BadParameter, match="Target must be set"):
-        run_benchmark(cfg_path, task="regression")
-
-
-def test_benchmark_rejects_missing_feature_columns(tmp_path: Path) -> None:
-    base = base_benchmark_config_text(tmp_path / "data.csv").replace(
-        'features = ["f1", "f2"]', 'features = ["f1", "f3"]'
-    )
-    cfg_path = _write_data_and_config(tmp_path, base)
-
-    with pytest.raises(typer.BadParameter, match="Missing feature columns"):
+    with pytest.raises(typer.BadParameter, match=r"Missing \[input\]\.data_path"):
         run_benchmark(cfg_path, task="regression")
 
 

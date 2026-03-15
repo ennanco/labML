@@ -9,6 +9,11 @@ import pandas as pd
 import typer
 
 from .benchmark_models import BenchmarkExecutionResult, BenchmarkRuntimeContext
+from .errors import (
+    ERROR_TYPE_INCOMPATIBLE_COMBO,
+    ERROR_TYPE_INTERNAL,
+    ERROR_TYPE_MODEL_EXECUTION,
+)
 from .output_handlers import (
     BenchmarkOutputPayload,
     CompositeOutputHandler,
@@ -16,6 +21,23 @@ from .output_handlers import (
     LatexOutputHandler,
     OutputHandler,
 )
+
+
+def _normalize_failed_rows(failed_rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    """Ensure failed rows include a stable `error_type` field."""
+    normalized: list[dict[str, Any]] = []
+    for row in failed_rows:
+        current = dict(row)
+        if "error_type" not in current:
+            status = str(current.get("status", "")).lower()
+            if status == "skipped":
+                current["error_type"] = ERROR_TYPE_INCOMPATIBLE_COMBO
+            elif status == "failed":
+                current["error_type"] = ERROR_TYPE_MODEL_EXECUTION
+            else:
+                current["error_type"] = ERROR_TYPE_INTERNAL
+        normalized.append(current)
+    return normalized
 
 
 def _build_default_output_handler(
@@ -36,7 +58,7 @@ def _build_result_dataframes(
 ) -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame, pd.DataFrame, list[str]]:
     """Convert row lists into detailed/summary/ranking dataframes."""
     detailed_df = pd.DataFrame(detailed_rows)
-    failed_df = pd.DataFrame(failed_rows)
+    failed_df = pd.DataFrame(_normalize_failed_rows(failed_rows))
 
     if detailed_df.empty:
         raise typer.BadParameter(
