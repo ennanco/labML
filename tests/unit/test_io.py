@@ -99,8 +99,7 @@ def test_load_metadata_behaviour(tmp_path: Path) -> None:
 def test_load_transform_hook_happy_path(tmp_path: Path) -> None:
     hook_path = tmp_path / "hook.py"
     hook_path.write_text(
-        "def transform(df, params):\n"
-        "    return df.assign(extra=params.get('x', 0))\n",
+        "def transform(df, params):\n    return df.assign(extra=params.get('x', 0))\n",
         encoding="utf-8",
     )
 
