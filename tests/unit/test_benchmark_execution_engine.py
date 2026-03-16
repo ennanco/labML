@@ -130,7 +130,9 @@ def test_execute_combinations_engine_handles_completed_skipped_and_failed() -> N
     assert reporter.finished == [1, 2, 3]
 
 
-def test_execute_combinations_engine_reraises_internal_errors(monkeypatch: pytest.MonkeyPatch) -> None:
+def test_execute_combinations_engine_reraises_internal_errors(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
     X = pd.DataFrame({"f1": [1.0, 2.0, 3.0, 4.0], "f2": [2.0, 3.0, 4.0, 5.0]})
     y = pd.Series([3.0, 5.0, 7.0, 9.0])
     splits = [

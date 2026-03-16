@@ -39,7 +39,9 @@ def test_prepare_rejects_missing_input_section(tmp_path: Path) -> None:
 
 def test_prepare_rejects_missing_input_path(tmp_path: Path) -> None:
     data_path = _write_data(tmp_path)
-    text = base_prepare_config_text(data_path).replace(f'path = "{data_path.name}"\n', "")
+    text = base_prepare_config_text(data_path).replace(
+        f'path = "{data_path.name}"\n', ""
+    )
     cfg_path = _write_prepare_cfg(tmp_path, text)
 
     with pytest.raises(typer.BadParameter, match=r"Missing \[input\]\.path"):

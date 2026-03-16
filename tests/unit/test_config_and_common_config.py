@@ -31,7 +31,9 @@ def test_require_section_returns_dict_and_rejects_missing() -> None:
     cfg = {"input": {"source": "external"}}
     assert require_section(cfg, "input") == {"source": "external"}
 
-    with pytest.raises(typer.BadParameter, match=r"Missing required section \[output\]"):
+    with pytest.raises(
+        typer.BadParameter, match=r"Missing required section \[output\]"
+    ):
         require_section(cfg, "output")
 
 

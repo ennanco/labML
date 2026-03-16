@@ -65,14 +65,21 @@ def test_resolve_metrics_uses_defaults_and_includes_primary() -> None:
 
     metrics, primary = _resolve_metrics(
         "regression",
-        config={"evaluation": {"metrics": ["r2"], "primary_metric": "neg_mean_squared_error"}},
+        config={
+            "evaluation": {
+                "metrics": ["r2"],
+                "primary_metric": "neg_mean_squared_error",
+            }
+        },
     )
     assert primary == "neg_mean_squared_error"
     assert metrics[0] == "neg_mean_squared_error"
 
 
 def test_resolve_metrics_rejects_non_list_metrics() -> None:
-    with pytest.raises(typer.BadParameter, match=r"\[evaluation\]\.metrics must be a list"):
+    with pytest.raises(
+        typer.BadParameter, match=r"\[evaluation\]\.metrics must be a list"
+    ):
         _resolve_metrics("regression", config={"evaluation": {"metrics": "r2"}})
 
 
@@ -126,7 +133,9 @@ def test_prepare_input_supports_implicit_feature_list(tmp_path: Path) -> None:
     assert metadata == {}
 
 
-def test_prepare_input_rejects_invalid_source_and_missing_columns(tmp_path: Path) -> None:
+def test_prepare_input_rejects_invalid_source_and_missing_columns(
+    tmp_path: Path,
+) -> None:
     data_path = _write_csv(tmp_path)
     config = _base_config(data_path)
 

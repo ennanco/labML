@@ -10,7 +10,9 @@ from labml.core.output_handlers import (
 )
 
 
-def _build_payload(tmp_path: Path, output_name: str = "results.xlsx") -> BenchmarkOutputPayload:
+def _build_payload(
+    tmp_path: Path, output_name: str = "results.xlsx"
+) -> BenchmarkOutputPayload:
     detailed_df = pd.DataFrame(
         {
             "experiment_id": [1, 1],
@@ -139,7 +141,9 @@ def test_composite_output_handler_concatenates_written_paths(tmp_path: Path) -> 
     payload = _build_payload(tmp_path, output_name="composite_results.xlsx")
     latex_dir = tmp_path / "latex_tables"
 
-    handler = CompositeOutputHandler([ExcelOutputHandler(), LatexOutputHandler(latex_dir)])
+    handler = CompositeOutputHandler(
+        [ExcelOutputHandler(), LatexOutputHandler(latex_dir)]
+    )
     written = handler.handle(payload)
 
     assert written == [

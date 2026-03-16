@@ -40,7 +40,9 @@ def test_save_artifacts_writes_expected_files(tmp_path: Path) -> None:
     folds = pd.Series([0, 1])
     metadata = {"task": "regression", "target": "target"}
 
-    data_path, folds_path, metadata_path = save_artifacts(output_dir, data, folds, metadata)
+    data_path, folds_path, metadata_path = save_artifacts(
+        output_dir, data, folds, metadata
+    )
 
     assert data_path.is_file()
     assert folds_path.is_file()

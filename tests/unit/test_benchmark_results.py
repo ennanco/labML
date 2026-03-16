@@ -4,7 +4,10 @@ import pandas as pd
 import pytest
 import typer
 
-from labml.core.benchmark_models import BenchmarkExecutionResult, BenchmarkRuntimeContext
+from labml.core.benchmark_models import (
+    BenchmarkExecutionResult,
+    BenchmarkRuntimeContext,
+)
 from labml.core.benchmark_results import (
     _build_default_output_handler,
     _build_metadata_df,
@@ -94,18 +97,20 @@ def test_build_default_output_handler_excludes_latex_when_disabled() -> None:
 
 
 def test_build_result_dataframes_returns_ordered_ranking() -> None:
-    detailed_df, failed_df, summary_df, ranking_df, group_cols = _build_result_dataframes(
-        detailed_rows=_sample_detailed_rows(),
-        failed_rows=[
-            {
-                "experiment_id": 3,
-                "status": "failed",
-                "error_type": "model_execution",
-                "reason": "boom",
-            }
-        ],
-        metrics=["r2"],
-        primary_metric="r2",
+    detailed_df, failed_df, summary_df, ranking_df, group_cols = (
+        _build_result_dataframes(
+            detailed_rows=_sample_detailed_rows(),
+            failed_rows=[
+                {
+                    "experiment_id": 3,
+                    "status": "failed",
+                    "error_type": "model_execution",
+                    "reason": "boom",
+                }
+            ],
+            metrics=["r2"],
+            primary_metric="r2",
+        )
     )
 
     assert not detailed_df.empty
@@ -186,7 +191,9 @@ def test_build_output_payload_assembles_all_sections(tmp_path: Path) -> None:
     )
     execution_result = BenchmarkExecutionResult(
         detailed_rows=_sample_detailed_rows(),
-        failed_rows=[{"status": "failed", "error_type": "model_execution", "reason": "boom"}],
+        failed_rows=[
+            {"status": "failed", "error_type": "model_execution", "reason": "boom"}
+        ],
         experiment_id=2,
         inner_jobs_forced_to_one=0,
     )
