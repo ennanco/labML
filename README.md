@@ -154,6 +154,8 @@ Ready-to-run examples are in `examples/`:
 
 These examples are self-contained and runnable from repo root with `uv run labml ...`.
 
+For a full option-by-option TOML reference (required/optional fields, defaults, valid values, and search-space syntax), see `docs/configuration.md`.
+
 Parameter values support:
 
 - single values (`0.1`)
